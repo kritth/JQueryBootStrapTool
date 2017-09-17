@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Project Data Viewer</title>
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/main.css" />
+		<link rel="icon" 
+			  type="image/png" 
+			  href="img/Calendar-icon.png" />
+	</head>
+	<body style="margin: 15px">
+		<!-- Loading screen-->
+		<div id="div-loading" class="container-fluid">
+			<div style="margin-top: 52vh; font-weight: 700;">Loading</div>
+		</div>
+		
+		<!-- Bottom nav bar -->
+		<div id="div-footer" class="container">
+			<nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
+				<div class="container-fluid">
+					<ul class="nav navbar-nav navbar-right">
+						<li><a>Kasidit Ritthagol &copy; Version 0.5</a></li>
+					</ul>
+					<!-- Time tracker -->
+<!--					
+					<ul class="nav navbar-nav navbar-left">
+						<li class="dropdown tracker-tool">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown">Tracker tool <b class="caret"></b></a>
+							<ul class="dropdown-menu" style="width: 600px;">
+								<li>
+									<table class="table" style="margin-bottom: 0;">
+										<thead>
+											<tr>
+												<th colspan="6">Time Tracker</th>
+											</tr>
+											<tr>
+												<td>Timer</td>
+												<td>Task</td>
+												<td>Start time</td>
+												<td>End time</td>
+												<td>Total time</td>
+												<td></td>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td><button>Start/Pause</button></td>
+												<td>Test Task</td>
+												<td>0.00</td>
+												<td>13.00</td>
+												<td>6 hours 20 minutes</td>
+												<td><button>-</button></td>
+											</tr>
+										</tbody>
+										<tfoot>
+											<tr>
+												<th colspan="6" style="text-align:right">
+													<button>Add row</button>
+													<button>Clear all</button>
+												</th>
+											</tr>
+										</tfoot>
+									</table>
+								</li>
+							</ul>
+						</li>
+					</ul>-->
+				</div>
+			</nav>
+		</div>
+		
+		<div id="warning-popup" class="alert fade in alert-dismissable" style="position: absolute; top: 55px; right: 5px; background-color: rgba(0, 0, 0, 0.2); border-radius: 7px; padding: 20px 20px 0px 20px;">
+			<div style="height: 1px; margin-right: 10px; margin-top: -15px; margin-bottom: 15px;">
+				<a href="#warning-popup" class="close" data-dismiss="alert" aria-label="close" title="close" onclick="decrementWarning();">x</a>
+			</div>
+			<!-- Warning -->
+			<div id="warning-dtt" class="alert alert-danger fade in alert-dismissable">
+				<a href="#warning-dtt" class="close" data-dismiss="alert" aria-label="close" title="close" onclick="decrementWarning();">x</a>
+				<strong>Warning:</strong> Due to security reason, please manually pick Daily Task Tracker file
+			</div>
+			<!--<div id="warning-crash" class="alert alert-warning fade in alert-dismissable">
+				<a href="#warning-crash" class="close" data-dismiss="alert" aria-label="close" title="close">x</a>
+				<strong>Warning:</strong> Need Crash Tracker file
+			</div>-->
+			<div id="warning-data" class="alert alert-danger fade in alert-dismissable">
+				<a href="#warning-data" class="close" data-dismiss="alert" aria-label="close" title="close" onclick="decrementWarning();">x</a>
+				<strong>Warning:</strong> Due to security reason, please manually pick Data (data_puller.xlsm) file
+			</div>
+			<div id="warning-refresh" class="alert alert-warning fade in alert-dismissable">
+				<a href="#warning-refresh" class="close" data-dismiss="alert" aria-label="close" title="close" onclick="decrementWarning();">x</a>
+				<strong>Info:</strong> Please click Reload button to load newest data
+			</div>
+			<div id="warning-execute" class="alert alert-warning fade in alert-dismissable">
+				<a href="#warning-execute" class="close" data-dismiss="alert" aria-label="close" title="close" onclick="decrementWarning();">x</a>
+				<strong>Info:</strong> Please click Execute button to populate newest data
+			</div>
+		</div>
+		
+		<!-- Top nav bar -->
+		<div id="div-header" class="container">
+			<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+				<div class="container-fluid">
+					<div class="collapse in navbar-collapse">
+						<!-- right side -->
+						<ul class="nav navbar-nav navbar-right" style="padding-right: 15px">
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">Instruction <b class="caret"></b></a>
+								<ol class="dropdown-menu" style="width: 300px;">
+										<li class="list-group-item" style="background-color: rgba(255, 100, 100, 0.3);">ONLY ONCE</li>
+										<li class="list-group-item" style="background-color: rgba(255, 100, 100, 0.3);">1. Hover over settings</li>
+										<li class="list-group-item" style="background-color: rgba(255, 100, 100, 0.3);">2. Pick DTT file</li>
+										<li class="list-group-item" style="background-color: rgba(255, 100, 100, 0.3);">3. Pick data_puller.xlsm in web data row can be found in \Testers\Kasidit\Prototype\data</li>
+										<li class="list-group-item">When you need fresh data, press Reload > Execute</li>
+										<li class="list-group-item">Anything in red in Display is not yet implemented</li>
+									</ol>
+								</li>
+							</li>
+							<li class="text-right" style="padding-top: 10px;">
+								<button id="btn-execute" onclick="executeExtract(); $('#warning-execute').alert('close'); decrementWarning();" class="btn btn-success" style="width: 150px">Execute</button>
+							</li>
+							<li class="text-right" style="margin-left: 10px; padding-top: 10px;">
+								<button id="btn-refresh" onclick="executeRefresh(); $('#warning-refresh').alert('close'); decrementWarning();" class="btn btn-info" style="width: 150px">Reload</button>
+							</li>
+						</ul>
+						<!-- left side -->
+						<ul class="nav navbar-nav">
+							<li style="border-right: 2px solid rgba(255, 255, 255, 0.3);"><a>Project data viewer</a></li>
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">Report <b class="caret"></b></a>
+								<ul class="dropdown-menu" style="width: 200px;">
+									<table class="table" style="margin-bottom: 0;">
+										<tbody id="checkbox-list">
+											<tr onclick="toggleCheckbox('#checkbox-detail');">
+												<td style="width: 20px;"><input id="checkbox-detail" type="checkbox" checked onchange="toggleDisplay(event, '#div-detail');"></td>
+												<td><label class="control-label">Summary</label></td>
+											</tr>
+											<tr onclick="toggleCheckbox('#checkbox-tfc');" style="border-bottom: 4px solid rgba(200, 200, 200, 0.6);">
+												<td><input id="checkbox-tfc" type="checkbox" checked onchange="toggleDisplay(event, '#div-tfc');"></td>
+												<td><label>TFC List</label></td>
+											</tr>
+											<tr onclick="toggleCheckbox('#checkbox-daily');">
+												<td style="width: 20px;"><input id="checkbox-daily" type="checkbox" checked onchange="toggleDisplay(event, '#div-daily-hours');"></td>
+												<td><label class="control-label">Daily report</label></td>
+											</tr>
+											<tr onclick="toggleCheckbox('#checkbox-weekly');">
+												<td><input id="checkbox-weekly" type="checkbox" checked onchange="toggleDisplay(event, '#div-weekly-hours');"></td>
+												<td><label class="control-label">Weekly report</label></td>
+											</tr>
+											<tr onclick="toggleCheckbox('#checkbox-jira');">
+												<td><input id="checkbox-jira" type="checkbox" checked onchange="toggleDisplay(event, '#div-jira');"></td>
+												<td><label>JIRA report</label></td>
+											</tr>
+											<tr onclick="toggleCheckbox('#checkbox-coverage');">
+												<td><input id="checkbox-coverage" type="checkbox" checked onchange="toggleDisplay(event, '#div-coverage');"></td>
+												<td><label>Coverage report</label></td>
+											</tr>
+											<!--
+											<tr onclick="toggleCheckbox('#checkbox-crash');" class="bg-danger">
+												<td><input id="checkbox-crash" type="checkbox" checked onchange="toggleDisplay(event, '#div-crash');"></td>
+												<td><label>Crash report</label></td>
+											</tr>
+											<tr onclick="toggleCheckbox('#checkbox-hindrance');" class="bg-danger">
+												<td><input id="checkbox-hindrance" type="checkbox" checked onchange="toggleDisplay(event, '#div-hindrance');"></td>
+												<td><label>Hindrance report</label></td>
+											</tr>
+											<tr onclick="toggleCheckbox('#checkbox-timelost');" class="bg-danger">
+												<td><input id="checkbox-timelost" type="checkbox" checked onchange="toggleDisplay(event, '#div-timelost');"></td>
+												<td><label>Timelost report</label></td>
+											</tr>
+											<tr onclick="toggleCheckbox('#checkbox-testcases');" class="bg-danger">
+												<td><input id="checkbox-testcases" type="checkbox" checked onchange="toggleDisplay(event, '#div-testcases');"></td>
+												<td><label>TCs creation report</label></td>
+											</tr>-->
+										</tbody>
+									</table>
+								</ul>
+							</li>
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">Settings <b class="caret"></b></a>
+								<ul class="dropdown-menu" style="width: 600px;">
+									<li>
+										<!-- Excel pick -->
+										<table class="table" style="margin-bottom: 0;">
+											<tbody>
+												<tr>
+													<th class="col-md-3 row">Daily task tracker file</th>
+													<td class="col-md-7"><input type="file" id="DTTInput" onchange="DTTPicked(event); $('#warning-dtt').alert('close'); decrementWarning();" /></td>
+												</tr>
+												<!--<tr class="bg-danger">
+													<th class="row">Crash tracker file</th>
+													<td><input type="file" id="CrashInput" onchange="CrashPicked(event); $('#warning-crash').alert('close');" /></td>
+												</tr>-->
+												<tr>
+													<th class="row">Web data location</th>
+													<td><input type="file" id="DataInput" onchange="DataPicked(event); $('#warning-data').alert('close'); decrementWarning();" /></td>
+												</tr>
+												<tr>
+													<th class="row" style="padding-top: 15px;">Time unit</th>
+													<td>
+														<select class="form-control" id="unit-selection">
+															<option value="1" selected>Hours</option>
+															<option value="2">Minutes</option>
+														</select>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</div>
+
+		<!-- Detail -->
+		<div id="div-detail">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#detail" data-toggle="collapse">Summary <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="detail" class="panel-collapse collapse in" style="padding-bottom: 0;">
+						<div class="panel panel-default" style="margin-bottom: 0;">
+							<div class="panel-heading">
+								<select id="tester-selector" class="form-control" onchange="switchDetailDropdown()">
+									<option value="0" selected>Select one to display</option>
+								</select>
+								<br />
+								<select id="trail-date-selector" class="form-control" onchange="switchDetailDropdown()">
+									<option value="0" selected>Today</option>
+									<option value="1">This week</option>
+								</select>
+							</div>
+							<table class="table table-striped panel-body">
+								<thead class="thead-default">
+									<tr>
+										<th style="width: 300px;" colspan="4">Category</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th class="row">Overall time spent</th>
+										<td id='overall-time'></td>
+										<td colspan="2"></td>
+									</tr>
+									<tr>
+										<th class="row">Testrail time spent</th>
+										<td id='trail-timespent'></td>
+										<th class="row">DTT time spent</th>
+										<td id='DTT-timespent'></td>
+									</tr>
+									<tr>
+										<th class="row">TCs performed</th>
+										<td id='trail-performed'></td>
+										<th class="row">Issues written</th>
+										<td id='jira-written'></td>
+									</tr><!--
+									<tr>
+										<th class="row">TCs written</th>
+										<td></td>
+										<th class="row">TCs updated</th>
+										<td></td>
+									</tr>-->
+								</tbody>
+							</table>
+							<br />
+							<!-- Testrail performed -->
+							<div id="trail-detail">
+								<div class="generic-container">
+									<div class="panel panel-default" style="margin-bottom: 0;">
+										<div class="panel-heading">
+											<h2 class="panel-title">
+												<a href="#trail-tc-detail" data-toggle="collapse">Testcases performed <b class="caret"></b></a>
+											</h2>
+										</div>
+										<div id="trail-tc-detail" class="panel-collapse collapse">
+											<div class="panel panel-default" style="margin-bottom: 0;">
+												<table class="table table-striped panel-body">
+													<thead>
+														<tr>
+															<th>ID</th>
+															<th>Testrun</th>
+															<th>Summary</th>
+															<th>Result</th>
+															<th>Elapsed</th>
+														</tr>
+													</thead>
+													<tbody id="trail-tc-detail-value">
+													</tbody>
+													<tfoot id="trail-tc-detail-footer">
+													</tfoot>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- TFC -->
+		<div id="div-tfc">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#tfc" data-toggle="collapse">TFC List <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="tfc" class="panel-collapse collapse">
+						<div class="panel panel-default" style="margin-bottom: 0;">
+							<div class="panel-heading">
+								<select id="tfc-selector" class="form-control" onchange="tfcSelectorChanged()">
+									<option value="none" selected>Select feature</option>
+								</select>
+							</div>
+							<table class="table table-striped panel-body">
+								<thead class="thead-default">
+									<tr>
+										<th style="width: 100px;">Testcase ID</th>
+										<th>Summary</th>
+										<th>Release tag</th>
+									</tr>
+								</thead>
+								<tbody id="tfc-body">
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Daily Hours -->
+		<div id="div-daily-hours">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#hours-daily" data-toggle="collapse">Daily hours <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="hours-daily" class="panel-collapse collapse">
+						<div class="panel-body">
+							<!-- Project Summary panel -->
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h2 class="panel-title">
+										<a href="#hours-project-daily-summary" data-toggle="collapse">Project summary <b class="caret"></b></a>
+									</h2>
+								</div>
+								<div id="hours-project-daily-summary" class="panel-collapse collapse in">
+									<table class="table table-striped panel-body">
+										<thead class="thead-default">
+											<tr>
+												<th>ID</th>
+												<th>Name</th>
+												<th>Completion (%)</th>
+												<th>Fail (%)</th>
+												<th>Time spent today</th>
+											</tr>
+										</thead>
+										<tbody id="hours-project-daily-summary-value">
+										</tbody>
+										<tfoot id="hours-project-daily-summary-footer">
+										</tfoot>
+									</table>
+								</div>
+							</div>
+						
+							<!-- Tester Summary panel -->
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h2 class="panel-title">
+										<a href="#hours-tester-daily-summary" data-toggle="collapse">Per tester summary <b class="caret"></b></a>
+									</h2>
+								</div>
+								<div id="hours-tester-daily-summary" class="panel-collapse collapse">
+									<table class="table table-striped panel-body">
+										<thead class="thead-default">
+											<tr>
+												<th>Name</th>
+												<th>DTT hours</th>
+												<th>Testrail hours</th>
+												<th>Total hours</th>
+											</tr>
+										</thead>
+										<tbody id="hours-tester-daily-summary-value">
+										</tbody>
+										<tfoot id="hours-tester-daily-summary-footer">
+										</tfoot>
+									</table>
+								</div>
+							</div>
+							
+							<!-- DTT panel -->
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h2 class="panel-title">
+										<a href="#hours-daily-DTT" data-toggle="collapse">Daily Task Tracker hours <b class="caret"></b></a>
+									</h2>
+								</div>
+								<div id="hours-daily-DTT" class="panel-collapse collapse">
+									<table class="table table-striped panel-body">
+										<thead class="thead-default">
+											<tr>
+												<th>Name</th>
+												<th>Task hours</th>
+												<th>Timelost hours</th>
+												<th>Total hours</th>
+											</tr>
+										</thead>
+										<tbody id="hours-daily-dtt-value">
+										</tbody>
+										<tfoot id="hours-daily-dtt-footer" class="tfoot-default">
+										</tfoot>
+									</table>
+								</div>
+							</div>
+							
+							<!-- Testrail panel -->
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h2 class="panel-title">
+										<a href="#hours-daily-trail" data-toggle="collapse">Testrail hours <b class="caret"></b></a>
+									</h2>
+								</div>
+								<div id="hours-daily-trail" class="panel-collapse collapse">
+									<table class="table table-striped panel-body">
+										<thead class="thead-default">
+											<tr>
+												<th>Name</th>
+												<th>Time spent</th>
+											</tr>
+										</thead>
+										<tbody id="hours-daily-trail-value">
+										</tbody>
+										<tfoot id="hours-daily-trail-footer">
+										</tfoot>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Weekly Hours -->
+		<div id="div-weekly-hours">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#hours-weekly" data-toggle="collapse">Weekly hours <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="hours-weekly" class="panel-collapse collapse">
+						<div class="panel-body">
+							<!-- Project Summary panel -->
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h2 class="panel-title">
+										<a href="#hours-project-weekly-summary" data-toggle="collapse">Project summary <b class="caret"></b></a>
+									</h2>
+								</div>
+								<div id="hours-project-weekly-summary" class="panel-collapse collapse in">
+									<table class="table table-striped panel-body">
+										<thead class="thead-default">
+											<tr>
+												<th>ID</th>
+												<th>Name</th>
+												<th>Completion (%)</th>
+												<th>Failure (%)</th>
+												<th>Time spent today</th>
+											</tr>
+										</thead>
+										<tbody id="hours-project-weekly-summary-value">
+										</tbody>
+										<tfoot id="hours-project-weekly-summary-footer">
+										</tfoot>
+									</table>
+								</div>
+							</div>
+							
+							<!-- Tester Summary panel -->
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h2 class="panel-title">
+										<a href="#hours-tester-weekly-summary" data-toggle="collapse">Per tester summary <b class="caret"></b></a>
+									</h2>
+								</div>
+								<div id="hours-tester-weekly-summary" class="panel-collapse collapse">
+									<table class="table table-striped panel-body">
+										<thead class="thead-default">
+											<tr>
+												<th>Name</th>
+												<th>DTT hours</th>
+												<th>Testrail hours</th>
+												<th>Total hours</th>
+											</tr>
+										</thead>
+										<tbody id="hours-tester-weekly-summary-value">
+										</tbody>
+										<tfoot id="hours-tester-weekly-summary-footer">
+										</tfoot>
+									</table>
+								</div>
+							</div>
+							
+							<!-- DTT panel -->
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h2 class="panel-title">
+										<a href="#hours-weekly-DTT" data-toggle="collapse">Daily Task Tracker hours <b class="caret"></b></a>
+									</h2>
+								</div>
+								<div id="hours-weekly-DTT" class="panel-collapse collapse">
+									<table class="table table-striped panel-body">
+										<thead class="thead-default">
+											<tr>
+												<th>Name</th>
+												<th>Task hours</th>
+												<th>Timelost hours</th>
+												<th>Total hours</th>
+											</tr>
+										</thead>
+										<tbody id="hours-weekly-dtt-value">
+										</tbody>
+										<tfoot id="hours-weekly-dtt-footer" class="tfoot-default">
+										</tfoot>
+									</table>
+								</div>
+							</div>
+							
+							<!-- Testrail panel -->
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h2 class="panel-title">
+										<a href="#hours-weekly-trail" data-toggle="collapse">Testrail hours <b class="caret"></b></a>
+									</h2>
+								</div>
+								<div id="hours-weekly-trail" class="panel-collapse collapse">
+									<table class="table table-striped panel-body">
+										<thead class="thead-default">
+											<tr>
+												<th>Name</th>
+												<th>Time spent</th>
+											</tr>
+										</thead>
+										<tbody id="hours-weekly-trail-value">
+										</tbody>
+										<tfoot id="hours-weekly-trail-footer">
+										</tfoot>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- JIRA -->
+		<div id="div-jira">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#jira" data-toggle="collapse">JIRA Report <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="jira" class="panel-collapse collapse">
+						<div id="jira-body" class="panel-body">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Coverage -->
+		<div id="div-coverage">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#coverage" data-toggle="collapse">Coverage report <b class="caret"></b></a>
+							
+						</h2>
+					</div>
+					<div id="coverage" class="panel-collapse collapse in">
+						<div class="panel-heading">
+							<select id="coverage-selector" class="form-control" onchange="coverageSelectorChanged()">
+								<option value="none">Select milestone</option>
+							</select>
+						</div>
+					
+						<!-- top coverage -->
+						<div class="panel-body">
+							<div class="panel panel-default no-padding">
+								<div class="panel-heading">
+									<h3 class="panel-title">
+										<a href="#coverage-top" data-toggle="collapse">Top coverage <b class="caret"></b></a>
+									</h3>
+								</div>
+								<div id="coverage-top" class="panel-collapse collapse">
+									<table class="table table-striped no-padding">
+										<thead>
+											<tr>
+												<th>
+													<div id="coverage-top-heading">
+														<div class="panel-heading coverage-head container-fluid">
+															<div class="panel-title row">
+																<div class="col-md-8">Feature</div>
+																<div class="col-md-2">Coverage</div>
+																<div class="col-md-2">Time spent</div>
+															</div>
+														</div>
+													</div>
+												</th>
+											</tr>
+										</thead>
+										<tbody id="coverage-top-body">
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Least coverage -->
+						<div class="panel-body">
+							<div class="panel panel-default no-padding">
+								<div class="panel-heading">
+									<h3 class="panel-title">
+										<a href="#coverage-least" data-toggle="collapse">Least coverage <b class="caret"></b></a>
+									</h3>
+								</div>
+								<div id="coverage-least" class="panel-collapse collapse">
+									<table class="table table-striped no-padding">
+										<thead>
+											<tr>
+												<th>
+													<div id="coverage-least-heading">
+														<div class="panel-heading coverage-head container-fluid">
+															<div class="panel-title row">
+																<div class="col-md-8">Feature</div>
+																<div class="col-md-2">Coverage</div>
+																<div class="col-md-2">Time spent</div>
+															</div>
+														</div>
+													</div>
+												</th>
+											</tr>
+										</thead>
+										<tbody id="coverage-least-body">
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Graph 1 -->
+						<!-- SHELF until idea is in
+						<div class="panel-body">
+							<div class="panel panel-default no-padding">
+								<div class="panel-heading">
+									<h3 class="panel-title">
+										<a href="#coverage-graph-1" data-toggle="collapse">Feature coverage against time graph <b class="caret"></b></a>
+									</h3>
+								</div>
+								<div id="coverage-graph-1" class="panel-collapse collapse">
+									<table class="table table-striped no-padding">
+										<tbody id="coverage-least-body">
+											<tr>
+												<td>
+													<canvas id="lineChart" style="height: 0;"></canvas>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						-->
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Crash -->
+<!--		<div id="div-crash">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#crash" data-toggle="collapse">Crash report <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="crash" class="panel-collapse collapse">
+						<div class="panel-body">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Hindrance -->
+<!--		<div id="div-hindrance">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#hindrance" data-toggle="collapse">Hindrance report <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="hindrance" class="panel-collapse collapse">
+						<div class="panel-body">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Timelost -->
+<!--		<div id="div-timelost">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#timelost" data-toggle="collapse">Timelost report <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="timelost" class="panel-collapse collapse">
+						<div class="panel-body">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Testcases -->
+<!--		<div id="div-testcases">
+			<div class="generic-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">
+							<a href="#testcases" data-toggle="collapse">Testcases creation/update report <b class="caret"></b></a>
+						</h2>
+					</div>
+					<div id="testcases" class="panel-collapse collapse">
+						<div class="panel-body">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+-->		
+
+		<!-- To avoid being hidden in the bottom -->
+		<div id="footer-space" style="height: 50px;"></div>
+		<!-- jQuery -->
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"
+			  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+			  crossorigin="anonymous"></script>
+		<!-- Bootstrap js -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<!-- Excel reader cdn -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+		<script src="js/xlsx.js"></script>
+		<!-- Javascript util -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/javascript.util/0.12.12/javascript.util.min.js"></script>
+		<!-- MD bootstrap plugin -->
+		<script src="js/mdb.js"></script>
+		<!-- Other Javascript -->
+		<script src="data/settings.js"></script>
+		<script src="js/excel-reader.js"></script>
+		<script src="js/main.js"></script>
+		<script src="js/data-loader.js"></script>
+		<script src="js/daily.js"></script>
+		<script src="js/weekly.js"></script>
+		<script src="js/jira.js"></script>
+		<script src="js/detail.js"></script>
+		<script src="js/coverage.js"></script>
+		<script src="js/tfc.js"></script>
+	</body>
+</html>
